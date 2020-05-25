@@ -287,7 +287,7 @@ write.xlsx(list_of_datasets, file = "outputs/UG_Covid_jmmi_13may2020_period.xlsx
 
 
 analysis_df_list<-list(data_merge_summary,
-                       data_merge_settlement_MEB,
+       #                data_merge_settlement_MEB,
                        data_merge_runout_items,
                        data_merge_market_functionality,
                        data_merge_top5s)

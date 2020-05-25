@@ -3,7 +3,7 @@ all_jmmi <- bind_rows(region_jmmi,national_jmmi) %>% filter(period == "Bi 1 - Ma
 
 data_merge_market_functionality <- all_jmmi %>%
   select(Regions,vendors_change.Decreased,`vendors_perc_change.By more than 50 percent`,customers_change.Decreased,
-         `customers_perc_change.By more than 50 percent`,`decrease__pct.By more than 50 percent`, item_scarcity_reason.Supplier.unable.to.provide.enough.yes,
+         `customers_perc_change.By more than 50 percent`,`decrease__pct.By 26 to 50 percent`, item_scarcity_reason.Supplier.unable.to.provide.enough.yes,
          item_scarcity_reason.Supplier.unable.to.provide.enough.no, payment_type.Mobile.money.yes,stock_runout.Yes,
          stock_runout.No,cross_border_trade.Decreased,`cross_border_trade.No change`,`cross_border_trade.I don't know`,
          `cross_border_trade.There is no cross-border trade`, agents_open.Yes,agents_open.No,`safety.Less secure`,`agents_open.I dont know`,
@@ -259,39 +259,65 @@ safety_reasons_more_secure <- safety_reasons_more_secure %>%
 
 list_of_datasets <- list("More safe reasons" = safety_reasons_more_secure ,"Less safe reasons" = safety_reasons_less_secure )
 
-write.xlsx(list_of_datasets, file = "outputs/UG_COnvid_jmmi_15may2020_safety reasons.xlsx")
+write.xlsx(list_of_datasets, file = "outputs/UG_Covid_jmmi_15may2020_safety reasons.xlsx")
 
 
-safety_reasons <- safety_reasons %>%
+safety_reasons <- safety_reasons_more_secure %>%
+  group_by(Regions) %>%
+  mutate(more_secure_rank = rank(-proportion_reported,na.last = TRUE,ties.method = "random"))
+
+
+safety_reasons1 <- safety_reasons %>% filter(more_secure_rank == 1 ) %>% 
+  rename( "level"= Regions,"safety_reasons1" = more_safe_reasons, "safety_reasons_prop1" = proportion_reported) %>% 
+  select(level:safety_reasons_prop1)
+
+safety_reasons2 <- safety_reasons %>% filter(more_secure_rank == 2 ) %>% 
+  rename( "level"= Regions,"safety_reasons2" = more_safe_reasons, "safety_reasons_prop2" = proportion_reported) %>% 
+  select(level:safety_reasons_prop2)
+
+safety_reasons3 <- safety_reasons %>% filter(more_secure_rank == 3 ) %>% 
+  rename( "level"= Regions,"safety_reasons3" = more_safe_reasons, "safety_reasons_prop3" = proportion_reported) %>% 
+  select(level:safety_reasons_prop3)
+
+safety_reasons4 <- safety_reasons %>% filter(more_secure_rank == 4 ) %>% 
+  rename( "level"= Regions,"safety_reasons4" = more_safe_reasons, "safety_reasons_prop4" = proportion_reported) %>% 
+  select(level:safety_reasons_prop4)
+
+safety_reasons5 <- safety_reasons %>% filter(more_secure_rank == 5 ) %>% 
+  rename( "level"= Regions,"safety_reasons5" = more_safe_reasons, "safety_reasons_prop5" = proportion_reported) %>% 
+  select(level:safety_reasons_prop5)
+
+
+less_safety_reasons <- safety_reasons_less_secure %>%
   group_by(Regions) %>% 
   mutate(lowest_stock_item = rank(-proportion_reported,na.last = TRUE,ties.method = "random")) 
 
-safety_reasons1 <- safety_reasons %>% filter(lowest_stock_item == 1 ) %>% 
-  rename( "level"= Regions,"safety_reasons1" = safety_reasons, "safety_reasons_prop1" = proportion_reported) %>% 
+less_safety_reasons1 <- less_safety_reasons %>% filter(less_secure_rank == 1 ) %>% 
+  rename( "level"= Regions,"less_safety_reasons1" = less_safe_reasons, "safety_reasons_prop1" = proportion_reported) %>% 
   select(level:safety_reasons_prop1)
 
-safety_reasons2 <- safety_reasons %>% filter(lowest_stock_item == 2 ) %>% 
-  rename( "level"= Regions,"safety_reasons2" = safety_reasons, "safety_reasons_prop2" = proportion_reported) %>% 
+less_safety_reasons2 <- less_safety_reasons %>% filter(less_secure_rank == 2 ) %>% 
+  rename( "level"= Regions,"less_safety_reasons2" = less_safe_reasons, "safety_reasons_prop2" = proportion_reported) %>% 
   select(level:safety_reasons_prop2)
 
-safety_reasons3 <- safety_reasons %>% filter(lowest_stock_item == 3 ) %>% 
-  rename( "level"= Regions,"safety_reasons3" = safety_reasons, "safety_reasons_prop3" = proportion_reported) %>% 
+less_safety_reasons3 <- less_safety_reasons %>% filter(less_secure_rank == 3 ) %>% 
+  rename( "level"= Regions,"less_safety_reasons3" = less_safe_reasons, "safety_reasons_prop3" = proportion_reported) %>% 
   select(level:safety_reasons_prop3)
 
-safety_reasons4 <- safety_reasons %>% filter(lowest_stock_item == 4 ) %>% 
-  rename( "level"= Regions,"safety_reasons4" = safety_reasons, "safety_reasons_prop4" = proportion_reported) %>% 
+less_safety_reasons4 <- less_safety_reasons %>% filter(less_secure_rank == 4 ) %>% 
+  rename( "level"= Regions,"less_safety_reasons4" = less_safe_reasons, "safety_reasons_prop4" = proportion_reported) %>% 
   select(level:safety_reasons_prop4)
 
-safety_reasons5 <- safety_reasons %>% filter(lowest_stock_item == 5 ) %>% 
-  rename( "level"= Regions,"safety_reasons5" = safety_reasons, "safety_reasons_prop5" = proportion_reported) %>% 
+less_safety_reasons5 <- less_safety_reasons %>% filter(less_secure_rank == 5 ) %>% 
+  rename( "level"= Regions,"less_safety_reasons5" = less_safe_reasons, "safety_reasons_prop5" = proportion_reported) %>% 
   select(level:safety_reasons_prop5)
-
 
 analysis_df_list<-list(scarce_items1,scarce_items2,scarce_items3,scarce_items4,scarce_items5,
                        week_order1,week_order2,week_order3,week_order4,week_order5,scarcity_reason1,
                        scarcity_reason2,scarcity_reason3,scarcity_reason4,scarcity_reason5,
-                       restricted_goods1,restricted_goods2,restricted_goods3,restricted_goods4,restricted_goods5)
-                       #safety_reasons1,safety_reasons2,safety_reasons3,safety_reasons4,safety_reasons5)
+                       restricted_goods1,restricted_goods2,restricted_goods3,restricted_goods4,restricted_goods5,
+                       safety_reasons1,safety_reasons2,safety_reasons3,safety_reasons4,safety_reasons5,
+                       less_safety_reasons1,less_safety_reasons2,less_safety_reasons3,less_safety_reasons4,less_safety_reasons5)
 
 data_merge_top5s <-purrr::reduce(analysis_df_list, left_join)
 
