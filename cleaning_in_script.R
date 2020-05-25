@@ -15,6 +15,8 @@ clog <- cleaninglog(ids = cleaning_log$ï..uuid,
 # attr(cleaning_log, 'data_id_column_name') <- "X_uuid"
 # cleaning_log$change <- T
 
+cleaning_log$ï..uuid[!(cleaning_log$ï..uuid %in% data_raw$X_uuid)]
+
 data_clean <- clog_clean(df = data_raw, cleaninglog = clog)
 
 data_clean$safety_reason_recoding_lesssecure <- rep(NA, nrow(data_clean))
