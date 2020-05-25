@@ -1,9 +1,9 @@
 
-all_jmmi <- bind_rows(region_jmmi,national_jmmi) %>% filter(period == "Bi 2 - April") 
+all_jmmi <- bind_rows(region_jmmi,national_jmmi) %>% filter(period == "Bi 1 - May") 
 
 data_merge_market_functionality <- all_jmmi %>%
   select(Regions,vendors_change.Decreased,`vendors_perc_change.By more than 50 percent`,customers_change.Decreased,
-         `customers_perc_change.By more than 50 percent`,item_scarcity_reason.Supplier.unable.to.provide.enough.yes,
+         `customers_perc_change.By more than 50 percent`,`decrease__pct.By more than 50 percent`, item_scarcity_reason.Supplier.unable.to.provide.enough.yes,
          item_scarcity_reason.Supplier.unable.to.provide.enough.no, payment_type.Mobile.money.yes,stock_runout.Yes,
          stock_runout.No,cross_border_trade.Decreased,`cross_border_trade.No change`,`cross_border_trade.I don't know`,
          `cross_border_trade.There is no cross-border trade`, agents_open.Yes,agents_open.No,`safety.Less secure`,`agents_open.I dont know`,
@@ -257,24 +257,9 @@ safety_reasons_more_secure <- safety_reasons_more_secure %>%
   mutate(more_secure_rank = rank(-proportion_reported,na.last = TRUE,ties.method = "random")) %>% arrange(Regions,period,more_secure_rank)
 
 
-
-
-
-
 list_of_datasets <- list("More safe reasons" = safety_reasons_more_secure ,"Less safe reasons" = safety_reasons_less_secure )
 
 write.xlsx(list_of_datasets, file = "outputs/UG_COnvid_jmmi_15may2020_safety reasons.xlsx")
-
-
-
-
-
-
-
-
-
-
-
 
 
 safety_reasons <- safety_reasons %>%
