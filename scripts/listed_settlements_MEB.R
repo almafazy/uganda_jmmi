@@ -145,28 +145,24 @@ write.xlsx(list_of_datasets, file = "outputs/UG_COnvid_jmmi_AprilMEBs_14052020_p
 
 #march_MEB_cost <- bind_rows(march_region_MEB,march_national_MEB)
 
-
-
-
-
 #Factsheets-----
 
 #Settlement MEB ranking
 
-top_settlment_MEB <- settlment_MEB_fill %>% filter(period == "Bi 2 - April") %>% 
+top_settlment_MEB <- settlment_MEB_fill %>% filter(period == "Bi 1 - May") %>% 
   group_by(Regions) %>% 
   mutate(setlement_MEB_rank = rank(-FMEB,na.last = TRUE,ties.method = "random"))%>% 
   arrange(Regions,setlement_MEB_rank) %>%  filter(setlement_MEB_rank == 1) %>% select(Regions,settlement) %>% 
   rename("level" = Regions, "most_expensive_settlement1"= settlement)
 
-top_settlment_MEB2 <- settlment_MEB_fill %>% filter(period == "Bi 2 - April") %>% 
+top_settlment_MEB2 <- settlment_MEB_fill %>% filter(period == "Bi 1 - May") %>% 
   group_by(Regions) %>% 
   mutate(setlement_MEB_rank = rank(-FMEB,na.last = TRUE,ties.method = "random"))%>% 
   arrange(Regions,setlement_MEB_rank) %>%  filter(setlement_MEB_rank == 2) %>%  select(Regions,settlement) %>% 
   rename("level" = Regions, "most_expensive_settlement2"=settlement)
 
 
-top_settlment_MEB3 <- settlment_MEB_fill %>% filter(period == "Bi 2 - April") %>% 
+top_settlment_MEB3 <- settlment_MEB_fill %>% filter(period == "Bi 1 - May") %>% 
   group_by(Regions) %>% 
   mutate(setlement_MEB_rank = rank(-FMEB,na.last = TRUE,ties.method = "random"))%>% 
   arrange(Regions,setlement_MEB_rank) %>%  filter(setlement_MEB_rank == 3) %>%   select(Regions,settlement) %>% 
@@ -174,20 +170,20 @@ top_settlment_MEB3 <- settlment_MEB_fill %>% filter(period == "Bi 2 - April") %>
 
 
 
-low_settlment_MEB <- settlment_MEB_fill %>% filter(period == "Bi 2 - April") %>% 
+low_settlment_MEB <- settlment_MEB_fill %>% filter(period == "Bi 1 - May") %>% 
   group_by(Regions) %>% 
   mutate(setlement_MEB_rank = rank(FMEB,na.last = TRUE,ties.method = "random"))%>% 
   arrange(Regions,setlement_MEB_rank) %>%  filter(setlement_MEB_rank == 1) %>%   select(Regions,settlement) %>% 
   rename("level" = Regions, "least_expensive_settlement1"= settlement)
 
-low_settlment_MEB2 <- settlment_MEB_fill %>% filter(period == "Bi 2 - April") %>% 
+low_settlment_MEB2 <- settlment_MEB_fill %>% filter(period == "Bi 1 - May") %>% 
   group_by(Regions) %>% 
   mutate(setlement_MEB_rank = rank(FMEB,na.last = TRUE,ties.method = "random"))%>% 
   arrange(Regions,setlement_MEB_rank) %>%  filter(setlement_MEB_rank == 2) %>%   select(Regions,settlement) %>% 
   rename("level" = Regions, "least_expensive_settlement2"=settlement)
 
 
-low_settlment_MEB3 <- settlment_MEB_fill %>% filter(period == "Bi 2 - April") %>% 
+low_settlment_MEB3 <- settlment_MEB_fill %>% filter(period == "Bi 1 - May") %>% 
   group_by(Regions) %>% 
   mutate(setlement_MEB_rank = rank(FMEB,na.last = TRUE,ties.method = "random"))%>% 
   arrange(Regions,setlement_MEB_rank) %>%  filter(setlement_MEB_rank == 3) %>%   select(Regions,settlement) %>% 
@@ -217,7 +213,7 @@ lower_settlment_MEB <- settlment_MEB_fill %>% group_by(period) %>%
 
 list_of_datasets <- list("expensive foodMEB" = n_top_settlment_MEB,"Least Food MEB" = lower_settlment_MEB)
 
-write.xlsx(list_of_datasets, file = "outputs/UG_COnvid_jmmi_AprilMEBs_ranking_052020_period.xlsx")
+write.xlsx(list_of_datasets, file = "outputs/UG_COnvid_jmmi_May_first_half_MEBs_ranking_052020_period.xlsx")
   
 # 
 # n_top_settlment_MEB2 <- settlment_MEB[,c(3,33)] %>% 

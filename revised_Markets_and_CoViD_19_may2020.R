@@ -12,6 +12,13 @@ library(purrr)
 df_may <- data_clean
 names(df_may)[1] <- "start" 
 df_april <- read.csv("inputs/Markets_and_CoViD_19_tool_2020_04 _15th_13th.csv",stringsAsFactors=FALSE, na.strings = c(""," ","NA"))
+
+df_april$decrease__pct <- rep(NA, nrow(data_clean))
+df_april$decrease__pct[data_clean$customers_change == "Decreased"] <- data_clean$customers_perc_change[data_clean$customers_change == "Decreased"]
+df_april$increase_pct <- rep(NA, nrow(data_clean))
+df_april$increase_pct[data_clean$customers_change == "Increased"] <- data_clean$customers_perc_change[data_clean$customers_change == "Increased"]
+
+
 df_march <- read.csv("inputs/March raw data.csv",stringsAsFactors=FALSE, na.strings = c(""," ","NA"))
 
 
@@ -102,6 +109,9 @@ df1 <- sep
 df1[sep==2] <- "no"
 df1[sep==1] <- "yes"
 
+df1[sep=="FALSE"] <- "no"
+df1[sep=="TRUE"] <- "yes"
+
 df1 <- df1 %>%  mutate(market_final = ifelse(market == "Other",market_other,market))
 
 
@@ -155,7 +165,7 @@ region_items <- item_prices %>%  select(-uuid,-market_final,-DISTRICT,-settlemen
   summarise_all(funs(median(., na.rm = TRUE)))
 
 Market_info <- df1 %>%  select(Regions,DISTRICT,settlement, period, agents_open, trader_restricted,
-                               starts_with(c("payment_type","vendors","customer","safety","item_name_scarce.","item_scarcity_reason","stock_runout","Order_in_week_item","cross_border_trade","goods_restricted")),
+                               starts_with(c("payment_type","vendors","customer","decrease", "increase","safety","item_name_scarce.","item_scarcity_reason","stock_runout","Order_in_week_item","cross_border_trade","goods_restricted")),
                                new_rules,reason_restricted,challenge,
                                -payment_type,- item_scarcity_reason, - stock_runout_item,- order_in_week_item, - cross_border_trade_items,
                                -goods_restricted)
@@ -175,7 +185,6 @@ Market_info$goods_restricted.Leafy.Vegetables <- forcats::fct_expand(Market_info
 Market_info$item_name_scarce.Leafy.Vegetables <- forcats::fct_expand(Market_info$item_name_scarce.Leafy.Vegetables,c("yes","no"))
 
 dfsvy_jmmi_markets <-srvyr::as_survey(Market_info)
-
 
 jmmi_columns <- Market_info %>% select(-Regions,-DISTRICT,-settlement, -period) %>%  colnames() %>% dput()
 
@@ -232,7 +241,7 @@ markets_per_region <- item_prices %>%  select(Regions,period, market_final) %>%
   group_by(Regions,period) %>% 
  summarise(num_market_assessed = n_distinct(market_final),
            num_assessed = length(period)) %>% 
-  rename("level"=Regions) %>% filter(period == "Bi 2 - April") %>% 
+  rename("level"=Regions) %>% filter(period == "Bi 1 - May") %>% 
   select(level,num_market_assessed,num_assessed)
 
 settlements_per_region <- item_prices %>%  select(Regions,settlement,period) %>% 
@@ -246,7 +255,7 @@ markets_nationwide <- item_prices %>%  select(Regions,period, market_final) %>%
   summarise(num_market_assessed = n_distinct(market_final),
             num_assessed = length(period),
             level = "Nationwide") %>% 
-  filter(period == "Bi 2 - April") %>% 
+  filter(period == "Bi 1 - May") %>% 
   select(level,num_market_assessed,num_assessed)
 
 
