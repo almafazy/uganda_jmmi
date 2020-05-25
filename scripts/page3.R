@@ -290,8 +290,8 @@ safety_reasons5 <- safety_reasons %>% filter(lowest_stock_item == 5 ) %>%
 analysis_df_list<-list(scarce_items1,scarce_items2,scarce_items3,scarce_items4,scarce_items5,
                        week_order1,week_order2,week_order3,week_order4,week_order5,scarcity_reason1,
                        scarcity_reason2,scarcity_reason3,scarcity_reason4,scarcity_reason5,
-                       restricted_goods1,restricted_goods2,restricted_goods3,restricted_goods4,restricted_goods5,
-                       safety_reasons1,safety_reasons2,safety_reasons3,safety_reasons4,safety_reasons5)
+                       restricted_goods1,restricted_goods2,restricted_goods3,restricted_goods4,restricted_goods5)
+                       #safety_reasons1,safety_reasons2,safety_reasons3,safety_reasons4,safety_reasons5)
 
 data_merge_top5s <-purrr::reduce(analysis_df_list, left_join)
 
