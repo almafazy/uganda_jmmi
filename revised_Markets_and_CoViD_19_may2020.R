@@ -9,14 +9,16 @@ library(purrr)
 #Load data-------
 #READ in the JMMI data
 
+
 df_may <- data_clean
 names(df_may)[1] <- "start" 
-df_april <- read.csv("inputs/Markets_and_CoViD_19_tool_2020_04 _15th_13th.csv",stringsAsFactors=FALSE, na.strings = c(""," ","NA"))
+df_april <- read.csv("inputs/Markets_and_CoViD_19_tool_2020_04 _15th_13th.csv",
+                     stringsAsFactors=FALSE, na.strings = c(""," ","NA"))
 
-df_april$decrease__pct <- rep(NA, nrow(data_clean))
-df_april$decrease__pct[data_clean$customers_change == "Decreased"] <- data_clean$customers_perc_change[data_clean$customers_change == "Decreased"]
-df_april$increase_pct <- rep(NA, nrow(data_clean))
-df_april$increase_pct[data_clean$customers_change == "Increased"] <- data_clean$customers_perc_change[data_clean$customers_change == "Increased"]
+df_april$decrease__pct <- rep(NA, nrow(df_april))
+df_april$decrease__pct[df_april$customers_change == "Decreased"] <- df_april$customers_perc_change[df_april$customers_change == "Decreased"]
+df_april$increase_pct <- rep(NA, nrow(df_april))
+df_april$increase_pct[df_april$customers_change == "Increased"] <- df_april$customers_perc_change[df_april$customers_change == "Increased"]
 
 
 df_march <- read.csv("inputs/March raw data.csv",stringsAsFactors=FALSE, na.strings = c(""," ","NA"))
@@ -71,8 +73,8 @@ df_setlement <- left_join(df_setlement,district_data,by = "DISTRICT") #%>% disti
 #Some house cleaning-----
 # Remove columns that we don't need and rename our uuid columns 
 
-df <- df_setlement %>% select(settlement:DISTRICT,F15Regions,DName2019) %>%  
-  rename( "uuid"= X_uuid ) %>% 
+df <- df_setlement %>% select(settlement:DISTRICT,F15Regions,DName2019, X_uuid) %>%  
+  rename("uuid" = X_uuid ) %>% 
   select(-contains("X_"),-instanceID,-NAME,- OBJECTID.x ) %>% 
   mutate(sub_regions = str_to_sentence(F15Regions))
 
@@ -87,8 +89,6 @@ df <- Filter(function(x)!all(is.na(x) ), df)
 df <- df %>%  filter(!is.na(market))
 
 #Collection period
-
-
 df$month[df$Month == "March"] <- "March"
 df$month[df$month == "4"]<- "April"
 df$month[df$month == "5"]<- "May"
@@ -99,7 +99,7 @@ df$half[df$day > 14] <- "Bi 2"
 
 df$period <- paste(df$half,"-",df$month)
 
-#Instead of FALSE/TRUE we change them to yes/no 
+# Instead of FALSE/TRUE we change them to yes/no 
 
 sep <- df %>% lapply(function(x){if(is.logical(x)){return(as.character(x))
   }else{
@@ -114,12 +114,15 @@ df1[sep=="TRUE"] <- "yes"
 
 df1 <- df1 %>%  mutate(market_final = ifelse(market == "Other",market_other,market))
 
+# Prices columns
 
-#Prices columns
+# Trader_info <- df1 %>%  select(uuid,Regions,DISTRICT,settlement,market_final,
+# "trader_name","trader_contact")
 
-#Trader_info <- df1 %>%  select(uuid,Regions,DISTRICT,settlement,market_final,"trader_name","trader_contact")
-
-item_prices <- df1 %>%  select(uuid,period,Regions,DISTRICT,settlement,market_final,starts_with("price_"))
+item_prices <- df1 %>%  select(uuid,period,
+                               Regions,DISTRICT,
+                               settlement,market_final,
+                               starts_with("price_"))
 
 item_prices[item_prices == 99] <- NA
 
@@ -130,8 +133,10 @@ item_prices[ , 7:25] <- apply(item_prices[ , 7:25], 2,
 
 #Collection_order
 
-item_prices <- item_prices %>% mutate(collection_order = ifelse(period == "Bi 1 - May",3,
-                                                                ifelse(period == "Bi 2 - April",2,1)))
+item_prices <- item_prices %>% mutate(collection_order = ifelse(period == "Bi 1 - May",4,
+                                                                ifelse(period == "Bi 2 - April",3,
+                                                                       ifelse(period == "Bi 1 - April", 2,1)
+                                                                       )))
 #Median prices ----
 
 national_items <- item_prices %>%  

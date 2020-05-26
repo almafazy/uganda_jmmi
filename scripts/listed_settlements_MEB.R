@@ -29,16 +29,12 @@ item_prices_fill_units$price_dodo_kg_max <- item_prices_fill_units$price_dodo / 
 item_prices_fill_units$price_fish_kg_max <- item_prices_fill_units$price_fish / item_prices_fill_units$Max_Observed_quantity_fish
 item_prices_fill_units$price_firewood_kg_max <- item_prices_fill_units$price_firewood / item_prices_fill_units$Max_Observed_quantity_firewood
 
-
 #min prices per kg
 
 item_prices_fill_units$price_cassava_kg_min <- item_prices_fill_units$price_cassava / item_prices_fill_units$Min_Observed_quantity_cassava
 item_prices_fill_units$price_dodo_kg_min <- item_prices_fill_units$price_dodo / item_prices_fill_units$Min_Observed_quantity_dodo
 item_prices_fill_units$price_fish_kg_min <- item_prices_fill_units$price_fish / item_prices_fill_units$Min_Observed_quantity_fish
 item_prices_fill_units$price_firewood_kg_min <- item_prices_fill_units$price_firewood / item_prices_fill_units$Min_Observed_quantity_firewood
-
-
-
 
 #median prices per kg
 
@@ -107,11 +103,10 @@ settlment_MEB_fill <- item_prices_fill_units %>%  select(-uuid,-market_final) %>
   summarise_all(funs(median(., na.rm = TRUE)))
 
 
-settlment_MEB_fill_map <- settlment_MEB_fill %>%  filter(collection_order == 2)
+settlment_MEB_fill_map <- settlment_MEB_fill %>%  filter(period == "Bi 1 - May")
 
 
 write.csv(settlment_MEB_fill_map,"outputs/Updated_settlment_MEB_fill_map.csv")
-
 
 region_items_MEB <-item_prices_fill_units[,c(3,7:77)]
 
@@ -120,26 +115,64 @@ region_MEB <- region_items_MEB %>%
   summarise_all(funs(median(., na.rm = TRUE)))#%>% 
   #select(Regions,FMEB) %>% rename("level" = Regions, "food_basket_cost"= FMEB)
 
-
-
-
 national_items_MEB <- item_prices_fill_units[,c(7:77)]
 
-
-
-  
 national_MEB <- national_items_MEB %>%  
   group_by(collection_order) %>% 
   summarise_all(funs(median(., na.rm = TRUE))) #%>% mutate(level = "Nationwide") %>% 
   #rename( "food_basket_cost"= FMEB)
 
+###################
+# Percentage Change
+#####################
+
+# Calculate percentage change between months SETTLEMENT
+settlement_MEB_pct_change <- settlment_MEB_fill %>% split.data.frame(.,factor(settlment_MEB_fill$collection_order))
+change_settlement_april <- mapply(function(x, y){
+  if(is.numeric(x)&is.numeric(y)){
+    z <- (x-y)/y*100
+    return(z)}
+}, settlement_MEB_pct_change[[4]], settlement_MEB_pct_change[[3]]) %>% do.call(cbind,.) %>% as.data.frame
+names(change_settlement_april) %<>% gsub("price_", "",.) %>% paste0(.,"_perct", "_april") 
+change_settlement_april$settlement <- settlement_MEB_pct_change[[3]]$settlement
+
+change_settlement_march <- mapply(function(x, y){
+  if(is.numeric(x)&is.numeric(y)){
+    z <- (x-y)/y*100
+    return(z)}
+}, settlement_MEB_pct_change[[4]], settlement_MEB_pct_change[[1]]) %>% do.call(cbind,.) %>% as.data.frame
+names(change_settlement_march) %<>% gsub("price_", "",.) %>% paste0(.,"_perct", "_march") 
+change_settlement_march$settlement <- settlement_MEB_pct_change[[1]]$settlement
+
+change_setllement <- merge(change_settlement_april, change_settlement_march, by = "settlement", all.y = T)
+
+# Calculate percentage change between months REGION
+region_MEB_pct_change <- region_MEB %>% split.data.frame(.,factor(region_MEB$collection_order))
+change_region_april <- mapply(function(x, y){
+  if(is.numeric(x)&is.numeric(y)){
+    z <- (x-y)/y*100
+    return(z)}
+}, region_MEB_pct_change[[4]], region_MEB_pct_change[[3]]) %>% do.call(cbind,.) %>% as.data.frame
+names(change_region_april) %<>% gsub("price_", "",.) %>% paste0(.,"_perct", "_april") 
+
+change_region_march <- mapply(function(x, y){
+  if(is.numeric(x)&is.numeric(y)){
+    z <- (x-y)/y*100
+    return(z)}
+}, region_MEB_pct_change[[4]], region_MEB_pct_change[[1]]) %>% do.call(cbind,.) %>% as.data.frame
+names(change_region_march) %<>% gsub("price_", "",.) %>% paste0(.,"_perct", "_march") 
+
+percent_change_region <- cbind(change_region_april, change_region_march)
+percent_change_region$Regions <- c("South West", "West Nile")
 
 
-list_of_datasets <- list("Sttlement MEB" = settlment_MEB_fill,"REGION MEB" = region_MEB, "National MEB" = national_MEB)
+list_of_datasets <- list("Sttlement MEB" = settlment_MEB_fill,
+                         "REGION MEB" = region_MEB, 
+                         "National MEB" = national_MEB, 
+                         "Percent_change Settlement" = change_setllement,
+                         "Percent change Region" = percent_change_region)
 
-write.xlsx(list_of_datasets, file = "outputs/UG_COnvid_jmmi_AprilMEBs_14052020_period.xlsx")
-
-
+write.xlsx(list_of_datasets, file = "outputs/UG_Covid_jmmi_May_MEBs_25052020_period.xlsx")
 
 #MEB_cost <-bind_rows(region_MEB,national_MEB)
 
@@ -209,11 +242,9 @@ lower_settlment_MEB <- settlment_MEB_fill %>% group_by(period) %>%
   arrange(setlement_MEB_rank) %>%  select(period,settlement,setlement_MEB_rank,FMEB) 
 
 
-
-
 list_of_datasets <- list("expensive foodMEB" = n_top_settlment_MEB,"Least Food MEB" = lower_settlment_MEB)
 
-write.xlsx(list_of_datasets, file = "outputs/UG_COnvid_jmmi_May_first_half_MEBs_ranking_052020_period.xlsx")
+write.xlsx(list_of_datasets, file = "outputs/UG_Covid_jmmi_May_first_half_MEBs_ranking_052020_period.xlsx")
   
 # 
 # n_top_settlment_MEB2 <- settlment_MEB[,c(3,33)] %>% 
