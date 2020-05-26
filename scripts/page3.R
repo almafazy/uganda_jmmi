@@ -218,19 +218,70 @@ restricted_goods5 <- restricted_goods %>% filter(lowest_stock_item == 5 ) %>%
 #Safety reasons--------
 
 
-safety_reasons <- all_jmmi %>% select(Regions,starts_with("safety_reason."))
+safety_reasons_less_secure <- all_jmmi %>% select(Regions,period,starts_with("safety_reason_recoding_lesssecure."))
 
 
-safety_reasons_col <- all_jmmi %>% select(starts_with("safety_reason.")) %>% colnames()
+safety_reasons_less_secure_col <- all_jmmi %>% select(starts_with("safety_reason_recoding_lesssecure.")) %>% colnames()
 
 
-safety_reasons  <- safety_reasons %>% pivot_longer(safety_reasons_col,
-                                                       names_to="safety_reasons",
+safety_reasons_less_secure  <- safety_reasons_less_secure %>% pivot_longer(safety_reasons_less_secure_col,
+                                                       names_to="less_safe_reasons",
                                                        values_to="proportion_reported")
 
 
-safety_reasons <- safety_reasons %>% 
-  mutate(safety_reasons = str_remove_all(safety_reasons,"safety_reason."))
+
+safety_reasons_less_secure <- safety_reasons_less_secure %>%  
+  mutate(Regions = ifelse(is.na(Regions),"nationwide",Regions)) %>% mutate(Regions = str_replace(Regions, "1", "South West"),
+                                                                           Regions = str_replace(Regions, "2", "West Nile")) %>%  
+  mutate(less_safe_reasons = str_remove_all(less_safe_reasons,"safety_reason_recoding_lesssecure.")) %>%  group_by(Regions,period) %>% 
+   arrange(Regions,period,proportion_reported) %>% 
+  mutate(less_secure_rank = rank(-proportion_reported,na.last = TRUE,ties.method = "random")) %>% arrange(Regions,period,less_secure_rank)
+
+
+
+
+#safty reason more secure -------
+
+
+safety_reasons_more_secure <- all_jmmi %>% select(Regions,period,starts_with("safety_reason_recoding_moresecure."))
+
+
+safety_reasons_more_secure_col <- all_jmmi %>% select(starts_with("safety_reason_recoding_moresecure.")) %>% colnames()
+
+
+safety_reasons_more_secure  <- safety_reasons_more_secure %>% pivot_longer(safety_reasons_more_secure_col,
+                                                                           names_to="more_safe_reasons",
+                                                                           values_to="proportion_reported")
+
+
+
+safety_reasons_more_secure <- safety_reasons_more_secure %>%  
+  mutate(Regions = ifelse(is.na(Regions),"nationwide",Regions)) %>% mutate(Regions = str_replace(Regions, "1", "South West"),
+                                                                           Regions = str_replace(Regions, "2", "West Nile")) %>%  
+  mutate(more_safe_reasons = str_remove_all(more_safe_reasons,"safety_reason_recoding_moresecure.")) %>%  group_by(Regions,period) %>% 
+  arrange(Regions,period,proportion_reported) %>% 
+  mutate(more_secure_rank = rank(-proportion_reported,na.last = TRUE,ties.method = "random")) %>% arrange(Regions,period,more_secure_rank)
+
+
+
+
+
+
+list_of_datasets <- list("More safe reasons" = safety_reasons_more_secure ,"Less safe reasons" = safety_reasons_less_secure )
+
+write.xlsx(list_of_datasets, file = "outputs/UG_COnvid_jmmi_15may2020_safety reasons.xlsx")
+
+
+
+
+
+
+
+
+
+
+
+
 
 safety_reasons <- safety_reasons %>%
   group_by(Regions) %>% 
@@ -265,4 +316,4 @@ analysis_df_list<-list(scarce_items1,scarce_items2,scarce_items3,scarce_items4,s
 
 data_merge_top5s <-purrr::reduce(analysis_df_list, left_join)
 
-
+write.csv(data_merge_top5s,"outputs/top5_reasons_recoded.csv")
